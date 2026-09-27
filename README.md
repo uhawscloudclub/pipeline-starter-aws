@@ -1,55 +1,157 @@
 # My First CI/CD Pipeline on AWS
 
-Every time you push a change, a pipeline checks your code. Only if the checks pass does it publish your website.
-Everything happens in your browser. No installs.
+**AWS Student Builder Group at University of Houston | DevOps & CI/CD Workshop**
+
+In this lab you'll build a real CI/CD pipeline. Every time you change your website on GitHub, AWS Amplify automatically checks your code. If the checks pass, your site goes live. If they fail, nothing gets published and your old site stays up.
+
+Everything happens in your web browser. You don't install anything.
+
+**Time:** about 45 minutes. **Cost:** $0 on the AWS Free plan.
+
+### Words you'll see
+| Word | What it means here |
+| --- | --- |
+| **Repo** (repository) | A project folder on GitHub that remembers every change |
+| **Commit** | Saving a change to your repo |
+| **Build** | Amplify running the checks in `amplify.yml` |
+| **Deploy** | Publishing your site so anyone can see it |
+| **CI** (continuous integration) | Automatically checking every change |
+| **CD** (continuous delivery/deployment) | Automatically publishing changes that pass the checks |
+
+---
 
 ## Before the workshop (do this at home)
-- Sign in to GitHub once on the laptop you'll bring. Have your 2FA app or recovery codes ready.
-- Create your AWS account at least 2 days early. Sign in once and open the Amplify console to make sure it's active.
-- Turn on MFA for your AWS root user, and create a zero-spend budget in **Billing and Cost Management > Budgets**.
-- Charge your laptop.
 
-If your AWS account isn't working on the day, pair up with a classmate and follow along on their screen.
+- [ ] **GitHub:** sign in at [github.com](https://github.com) on the laptop you'll bring. Keep your 2FA app or recovery codes handy.
+- [ ] **AWS account:** create it at least **2 days early** at [aws.amazon.com](https://aws.amazon.com) (you need a card and a phone). Choose the **Free plan**.
+- [ ] **Check it works:** sign in to the [AWS Console](https://console.aws.amazon.com), search for **Amplify**, and open it. If you see a message that your account is still being activated, wait and try again later.
+- [ ] **Protect your account:** turn on MFA for your root user (**your account name** top right **> Security credentials > Assign MFA device**), then create a budget alert (**Billing and Cost Management > Budgets > Create budget > Zero spend budget**).
+- [ ] **Charge your laptop.**
 
-## Step 1. Copy the starter repo
-1. On the workshop repo page, click the green **Use this template** button, then **Create a new repository**.
-2. Name it `my-first-pipeline`. Set it to **Public**. Click **Create repository**.
+> If your AWS account isn't working on the day, pair up with a classmate and follow along on their screen. You can redo it on your own later with this guide.
 
-## Step 2. Connect it to AWS Amplify
-1. Sign in to the AWS Console. In the top-right corner, set the Region to **US East (N. Virginia)**.
-2. Search for **Amplify** and open it. Click **Deploy an app**.
-3. Choose **GitHub**, then **Next**. Two GitHub screens will appear:
-   - **Authorize AWS Amplify**: click **Authorize**.
-   - **Install AWS Amplify**: choose **Only select repositories**, pick `my-first-pipeline`, click **Install & Authorize**.
-   - Nothing appeared? Your browser blocked the pop-up. Allow pop-ups for this site and try again.
-4. Pick your repo and the `main` branch. Click **Next**.
-5. Amplify should say it found `amplify.yml`. Leave everything else as is. Click **Next**, then **Save and deploy**.
-6. Wait for **Deployed** (1-3 minutes). Click the link. That's your live site.
+---
 
-## Step 3. Make your first change
-1. In your GitHub repo, click `index.html`, then the pencil icon.
-2. Change `[Your Name]` to your name.
-3. Click **Commit changes**, then **Commit changes** again.
-4. In Amplify, watch the new build run. Refresh your site when it finishes.
+## Step 1. Make your own copy of this project (3 min)
 
-## Step 4. Break it on purpose: a bug
-1. Edit `index.html`. Delete this whole line: `<title>My First Pipeline</title>`. Commit.
-2. Watch the build **fail**. Open the build log and search (Ctrl+F) for **FAILED**.
-3. Your site is still up and still showing your last working version. The pipeline protected it.
-4. Put the line back exactly as above. Commit. Watch it go green.
+1. Make sure you're signed in to GitHub.
+2. Go to the workshop repo: **https://github.com/uhawscloudclub/pipeline-starter-aws** (the page you're reading now). At the top, click the green **Use this template** button, then **Create a new repository**.
+3. Fill in the form:
+   - **Owner:** your GitHub username
+   - **Repository name:** `my-first-pipeline`
+   - **Visibility:** choose **Public** in the **Choose visibility** dropdown
+4. Click **Create repository**.
 
-## Step 5. Break it on purpose: a leaked key
-1. Copy the **fake** example key from the workshop slide. Never paste a real key anywhere.
-2. Edit `index.html` and paste it anywhere in the page. Commit.
-3. Watch the build fail with **FAILED - leaked AWS key found**. Your site does not update.
-4. Remove the key and commit. Back to green.
+✅ **You should see:** a page titled `your-username/my-first-pipeline` with three files: `README.md`, `amplify.yml`, and `index.html`.
 
-**The part that matters:** removing the key did not un-leak it. It is still in your repo's history, and the repo is public. With a real key, the first move is to **deactivate the key in AWS**, then clean up the code. This check only stops a bad deploy. Real teams add secret scanners like GitHub push protection, gitleaks, or TruffleHog, and use short-lived credentials so there's no key to leak.
+From now on, work in **your** copy, not this page.
 
-## Bonus challenges
-- Put the key in a **new file** (like `config.js`). Is it caught? Look at `amplify.yml` to see why.
-- Add a third check: the page must contain your name.
-- Try to sneak a key past the check. What does that tell you about grep-based scanning?
+---
+
+## Step 2. Connect your repo to AWS Amplify (10-15 min)
+
+1. Open the [AWS Console](https://console.aws.amazon.com) and sign in.
+2. In the **top-right corner**, click the Region name and choose **US East (N. Virginia) us-east-1**.
+3. In the search bar at the top, type **Amplify** and click **AWS Amplify**.
+4. Click **Create new app**. (Some accounts show **Deploy an app** or **Get started** instead. Click that.) If you see starter template cards, **don't pick one**. We're using your own repo.
+5. Choose **GitHub** and click **Next**.
+6. GitHub will open a pop-up. You may see two screens:
+   - If GitHub asks you to sign in or enter a 2FA code, do it. That's normal.
+   - **Authorize AWS Amplify:** click **Authorize AWS Amplify**.
+   - **Install AWS Amplify:** choose **Only select repositories**, pick `my-first-pipeline`, then click **Install & Authorize**.
+   - Nothing popped up? Your browser blocked it. Look for a blocked pop-up icon in the address bar, allow pop-ups, and click **Next** again.
+7. Back in Amplify, under **Repository**, choose `my-first-pipeline`. Under **Branch**, choose `main`. Leave "My app is a monorepo" unchecked. Click **Next**.
+8. On **App settings**, leave everything as it is. You should see that Amplify detected your `amplify.yml`. If it asks about a **service role**, keep the default (**Create and use a new service role**). Click **Next**.
+9. On **Review**, click **Save and deploy**.
+10. Wait 1-3 minutes. The deployment goes through **Provision > Build > Deploy**.
+
+✅ **You should see:** a green **Deployed** status and a link that looks like `https://main.xxxxxxxx.amplifyapp.com`. Click it. That's your live website!
+
+---
+
+## Step 3. Make your first change (5 min)
+
+1. Go back to your repo on GitHub and click `index.html`.
+2. Click the **pencil icon** (Edit this file) at the top right of the file.
+3. Find `[Your Name]` and replace it with your name. Keep the rest the same.
+4. Click the green **Commit changes...** button. In the box that opens, click **Commit changes** again.
+5. Switch to the Amplify tab and click your app, then the **main** branch. A new deployment starts on its own. You didn't click anything in AWS. That's the pipeline.
+6. When it says **Deployed**, open your site link and refresh.
+
+✅ **You should see:** your name on your live site.
+
+---
+
+## Step 4. Break it on purpose: a bug (7 min)
+
+Real pipelines run checks so broken code never reaches users. Let's trigger one.
+
+1. On GitHub, edit `index.html` again (pencil icon).
+2. Delete this whole line:
+   ```html
+   <title>My First Pipeline</title>
+   ```
+3. Commit the change.
+4. In Amplify, watch the new deployment **fail** (it turns red).
+5. Click the failed deployment, then click the **Build** step to open the log. **Scroll to the very bottom.** Just above the red build-failed lines, find the line that **starts with** `FAILED`.
+   - Heads-up: the word FAILED also shows up on lines starting with `# Executing command`. That's Amplify printing the check before running it, even on passing builds. Ignore those.
+   - Log hard to read? Click **Download logs** and open the file.
+6. Open your site and refresh. It still shows your last working version. The pipeline protected it.
+7. Fix it: edit `index.html` and paste the title line back in, right under the `<meta charset="UTF-8">` line:
+   ```html
+     <title>My First Pipeline</title>
+   ```
+8. Commit. Watch the deployment go green again.
+
+✅ **You should see:** `FAILED - index.html has no <title>` in the log, then a green deployment after your fix.
+
+---
+
+## Step 5. Break it on purpose: a leaked key (8 min)
+
+Hackers scan GitHub for leaked cloud keys all day. Let's see the pipeline stop one.
+
+1. Copy this **fake** key. AWS publishes it in its docs as an example, so it can't access anything:
+   ```
+   AKIAIOSFODNN7EXAMPLE
+   ```
+   **Never paste a real key anywhere.**
+2. Edit `index.html` and paste the fake key on a new line anywhere inside `<body>`. Commit.
+3. In Amplify, watch the deployment fail. Open the **Build** log, scroll to the bottom, and find the line that starts with `FAILED`.
+4. Refresh your site. It did not update.
+5. Delete the key from `index.html` and commit. Watch it go green.
+
+✅ **You should see:** `FAILED - leaked AWS key found`, with the file name and line number of the key just above it.
+
+> **The part that matters:** deleting the key did not un-leak it. It's still in your repo's history (click **Commits** on your repo and you'll find it), and your repo is public. If a **real** key ever leaks, your first move is to **deactivate it in AWS right away**, then clean up the code. This check only stops a bad deploy. Real teams also use secret scanners (GitHub push protection, gitleaks, TruffleHog) and short-lived credentials, so there's no long-lived key to leak in the first place.
+
+---
+
+## Stuck? Quick fixes
+
+| Problem | Fix |
+| --- | --- |
+| No **Use this template** button | Sign in to GitHub first. |
+| The GitHub pop-up never appeared | Allow pop-ups for the AWS site, then click **Next** again. |
+| `my-first-pipeline` isn't in Amplify's repo list | Click **Update GitHub permissions** on that Amplify screen and add the repo. Or on GitHub: profile picture **> Settings > Applications > Installed GitHub Apps > AWS Amplify (us-east-1) > Configure**. |
+| My Amplify app disappeared | Check the Region in the top-right corner. It must be **US East (N. Virginia)**. |
+| "Your account is being activated" | Pair up with a classmate for today. Try again tomorrow. |
+| My first deploy failed | Did you edit `amplify.yml`? Open the Build log, scroll to the bottom, and read the line starting with `FAILED`. Ask a helper. |
+| I see "FAILED" but my build passed | That's the `# Executing command` line, Amplify showing the check before it runs. Only a line that **starts with** `FAILED` means a failure. |
+| I committed but no new deployment started | Make sure you edited the `main` branch. In Amplify, click the **main** branch and wait a minute. Still nothing? Ask a helper. |
+| Stuck on **Provision** for over 5 minutes | The first build on a new account can be slow. Wait a bit longer, then ask a helper. |
+| My site still shows the old version | Wait for **Deployed**, then hard refresh: **Ctrl+Shift+R** (**Cmd+Shift+R** on Mac). |
+| I can't find the log | Click your app, then **main**, then the deployment, then the **Build** step. |
+
+---
+
+## Bonus challenges (finished early?)
+
+1. **New file:** put the fake key in a new file called `config.js`. Is it still caught? Open `amplify.yml` and figure out why. (Why doesn't this README trigger it?)
+2. **Your own check:** add a third command to `amplify.yml` that fails the build if your name isn't on the page. Hint: copy how check 1 works.
+3. **Sneak attack:** try to get the key past the check without it matching. What does that tell you about simple pattern-based scanning?
+
+---
 
 ## Put this on your résumé and LinkedIn
 
