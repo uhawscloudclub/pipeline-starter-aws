@@ -64,6 +64,7 @@ From now on, work in **your** copy, not this page.
 8. On **App settings**, leave everything as it is. You should see that Amplify detected your `amplify.yml`. If it asks about a **service role**, keep the default (**Create and use a new service role**). Click **Next**.
 9. On **Review**, click **Save and deploy**.
 10. Wait 1-3 minutes. The deployment goes through **Provision > Build > Deploy**.
+    - The Amplify page doesn't always update by itself. If it still says **Deploying** after a minute or two, **refresh the page** (F5, or Cmd+R on Mac).
 
 ✅ **You should see:** a green **Deployed** status and a link that looks like `https://main.xxxxxxxx.amplifyapp.com`. Click it. That's your live website!
 
@@ -76,7 +77,7 @@ From now on, work in **your** copy, not this page.
 3. Find `[Your Name]` and replace it with your name. Keep the rest the same.
 4. Click the green **Commit changes...** button. In the box that opens, click **Commit changes** again.
 5. Switch to the Amplify tab and click your app, then the **main** branch. A new deployment starts on its own. You didn't click anything in AWS. That's the pipeline.
-6. When it says **Deployed**, open your site link and refresh.
+6. When it says **Deployed**, open your site link and refresh. (Amplify page looks stuck? Refresh it.)
 
 ✅ **You should see:** your name on your live site.
 
@@ -92,9 +93,10 @@ Real pipelines run checks so broken code never reaches users. Let's trigger one.
    <title>My First Pipeline</title>
    ```
 3. Commit the change.
-4. In Amplify, watch the new deployment **fail** (it turns red).
-5. Click the failed deployment, then click the **Build** step to open the log. **Scroll to the very bottom.** Just above the red build-failed lines, find the line that **starts with** `FAILED`.
-   - Heads-up: the word FAILED also shows up on lines starting with `# Executing command`. That's Amplify printing the check before running it, even on passing builds. Ignore those.
+4. In Amplify, watch the new deployment **fail** (it turns red). If nothing changes after a minute or two, refresh the Amplify page.
+5. Click the failed deployment, then click the **Build** step to open the log. **Scroll to the very bottom** and find the red **Build failed** line. The line **right above it** has the word **FAILED** and tells you what went wrong.
+   - Every log line starts with a timestamp, like `2026-09-30T16:05:12Z [INFO]:`. That's normal, so read past it.
+   - You'll also see FAILED inside lines that say `# Executing command`. That's Amplify showing the check before it runs, and it appears even on passing builds. Ignore those.
    - Log hard to read? Click **Download logs** and open the file.
 6. Open your site and refresh. It still shows your last working version. The pipeline protected it.
 7. Fix it: edit `index.html` and paste the title line back in, right under the `<meta charset="UTF-8">` line:
@@ -117,7 +119,7 @@ Hackers scan GitHub for leaked cloud keys all day. Let's see the pipeline stop o
    ```
    **Never paste a real key anywhere.**
 2. Edit `index.html` and paste the fake key on a new line anywhere inside `<body>`. Commit.
-3. In Amplify, watch the deployment fail. Open the **Build** log, scroll to the bottom, and find the line that starts with `FAILED`.
+3. In Amplify, watch the deployment fail (refresh the page if it looks stuck). Open the **Build** log, scroll to the bottom, and look for the word **FAILED** right above **Build failed**.
 4. Refresh your site. It did not update.
 5. Delete the key from `index.html` and commit. Watch it go green.
 
@@ -136,9 +138,10 @@ Hackers scan GitHub for leaked cloud keys all day. Let's see the pipeline stop o
 | `my-first-pipeline` isn't in Amplify's repo list | Click **Update GitHub permissions** on that Amplify screen and add the repo. Or on GitHub: profile picture **> Settings > Applications > Installed GitHub Apps > AWS Amplify (us-east-1) > Configure**. |
 | My Amplify app disappeared | Check the Region in the top-right corner. It must be **US East (N. Virginia)**. |
 | "Your account is being activated" | Pair up with a classmate for today. Try again tomorrow. |
-| My first deploy failed | Did you edit `amplify.yml`? Open the Build log, scroll to the bottom, and read the line starting with `FAILED`. Ask a helper. |
-| I see "FAILED" but my build passed | That's the `# Executing command` line, Amplify showing the check before it runs. Only a line that **starts with** `FAILED` means a failure. |
+| My first deploy failed | Did you edit `amplify.yml`? Open the Build log, scroll to the bottom, and read the line right above **Build failed**. Ask a helper. |
+| I see "FAILED" but my build passed | That's a `# Executing command` line, Amplify showing the check before it runs. A real failure always has a red **Build failed** line right below it. |
 | I committed but no new deployment started | Make sure you edited the `main` branch. In Amplify, click the **main** branch and wait a minute. Still nothing? Ask a helper. |
+| It says **Deploying** and never changes | Refresh the Amplify page (F5, or Cmd+R on Mac). The page doesn't always update on its own. |
 | Stuck on **Provision** for over 5 minutes | The first build on a new account can be slow. Wait a bit longer, then ask a helper. |
 | My site still shows the old version | Wait for **Deployed**, then hard refresh: **Ctrl+Shift+R** (**Cmd+Shift+R** on Mac). |
 | I can't find the log | Click your app, then **main**, then the deployment, then the **Build** step. |
